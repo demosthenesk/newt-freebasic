@@ -1,3 +1,7 @@
+/' This file was written by Angelo Rosina aka angros47
+   it is a port of c examples of newt lib
+'/
+
 #inclib "newt"
 #include "newt.bi"
 #define NULL 0
@@ -102,3 +106,4 @@
     newtFinished()
 
     print"rc = ";rc;" item = "; textWidth
+

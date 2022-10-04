@@ -1,3 +1,7 @@
+/' This file was written by Angelo Rosina aka angros47
+   it is a port of c examples of newt lib
+'/
+
 #define SIGTSTP		20	'from signal.h
 declare function raise alias "raise" (as long) as long
 
@@ -157,4 +161,5 @@ end sub
 	next
     end if
     deallocate(selectedList)
+
 	
