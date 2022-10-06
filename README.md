@@ -6,7 +6,7 @@ libnewt.a is the library and newt.bi is the header for freebasic projects.
 
 ## Installation
 
-You can copy libnewt.a to the folder of your bas file or install libnewt-dev.deb for your Debian/Ubuntu operating system.
+You can copy libnewt.a and libnewt.so to the folder of your bas file or install libnewt-dev.deb for your Debian/Ubuntu operating system.
 
 ## Examples - Tutorial
 
