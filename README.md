@@ -12,6 +12,8 @@ You can copy libnewt.a and libnewt.so to the folder of your bas file or install 
 
 There is Erik's Troan tutorial in libnewt-dev/tutorial.html folder.
 
+Also there is an extended tutorial for newt-freebasic, based on Erik's tutorial in help folder.
+
 There are many freebasic examples in freebasic examples folder.
 
 Special thanks to **Angelo Rosina** aka **angros47** who translate three c examples to freebasic (testtree.bas, testgrid.bas, test.bas)
