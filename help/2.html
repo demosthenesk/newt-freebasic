@@ -1,0 +1,139 @@
+﻿<html><body> 
+	<h1>Help documentation of newt-freebasic</h1>
+	
+	<table border="0" width="100%">
+	<tbody>
+    <tr>
+      <td align="left"><a href="1.html">Prev</a></td>
+      <td align="center"><a href="index.html">Home</a></td>
+      <td align="right"><a href="3.html">Next</a></td></tr>
+	</tbody>
+</table>
+<hr/>	
+<p><b>Table of Contents</b></p>
+	<ol start="2"><li><a href="2.html#2">Basic Newt Functions</a></li><ol><li><a href="2.html#2-1">Starting and Ending newt Services</a></li><li><a href="2.html#2-2">Handling Keyboard Input</a></li><li><a href="2.html#2-3">Drawing on the Root Window</a></li><li><a href="2.html#2-4">Refreshing the Screen</a></li><li><a href="2.html#2-5">Other Miscellaneous Functions</a></li><li><a href="2.html#2-6">Basic newt Example</a></li></ol>
+		</ol>	
+<p><a name="2"></a></p><h2><a name="2">2. Basic Newt Functions</a></h2>
+	<p>While most&nbsp;<tt>newt</tt>&nbsp;functions are concerned with widgets or groups of widgets (called grids and forms), some parts of the&nbsp;<tt>newt</tt>&nbsp;API deal with more global issues, such as initializing&nbsp;<tt>newt</tt> or writing to the root window.</p>
+<p><a name="2-1"></a></p><h2><a name="2-1">2.1 Starting and Ending newt Services</a></h2>
+	<p>There are three functions which nearly every&nbsp;<tt>newt</tt>&nbsp;application use.</p>
+	
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtInit() as long
+declare sub newtCls()
+declare function newtFinished() as long</b>
+</pre>
+
+	<p>The first two are used to initialize the system.</p>
+	
+<p><tt>newtInit()</tt></p>
+	<p><tt>newtCls()</tt></p>
+
+	<p><tt>newtInit()</tt>&nbsp;should be the first function called by every&nbsp;<tt>newt</tt>&nbsp;program. It initializes internal data structures and places the terminal in raw mode. Most applications invoke&nbsp;<tt>newtCls()</tt>&nbsp;immediately after&nbsp;<tt>newtInit()</tt>, which causes the screen to be cleared. It's not necessary to call&nbsp;<tt>newtCls()</tt>&nbsp;to use any of&nbsp;<tt>newt</tt>'s features, but doing so will normally give a much neater appearance. When a&nbsp;<tt>newt</tt>&nbsp;program is ready to exit, it should call&nbsp;<tt>newtFinished()</tt>.to use any of's features, but doing so will normally give a much neater appearance. When a program is ready to exit, it should call <tt>newtFinished()</tt></p><tt>newtFinished()</tt>&nbsp;restores the terminal to its appearance when&nbsp;<tt>newtInit()</tt>&nbsp;was called (if possible -- on some terminals the cursor will be moved to the bottom, but it won't be possible to remember the original terminal contents) and places the terminal in its original input state. If this function isn't called, the terminal will probably need to be reset with the&nbsp;&nbsp;command before it can be used easily.
+<tt>reset</tt>&nbsp;command before it can be used easily.
+
+	<p><a name="2-2"></a></p><h2><a name="2-2">2.2 Handling Keyboard Input</a></h2>
+	<p>Normally,&nbsp;<tt>newt</tt>&nbsp;programs don't read input directly from the user. Instead, they let&nbsp;<tt>newt</tt>&nbsp;read the input and hand it to the program in a semi-digested form.&nbsp;<tt>Newt</tt>&nbsp;does provide a couple of simple functions which give programs (a bit of) control over the terminal.</p>
+
+
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtWaitForKey()
+declare sub newtClearKeyBuffer()</b>
+</pre><p>The first of these,&nbsp;<tt>newtWaitForKey()</tt>, doesn't return until a key has been pressed. The keystroke is then ignored. If a key is already in the terminal's buffer,&nbsp;<tt>newtWaitForKey()</tt>&nbsp;discards a keystroke and returns immediately.&nbsp;<tt>newtClearKeyBuffer()</tt>&nbsp;discards the contents of the terminal's input buffer without waiting for additional input.</p>
+<p><a name="2-3"></a></p><h2><a name="2-3">2.3 Drawing on the Root Window</a></h2>
+	<p>The background of the terminal's display (the part without any windows covering it) is known as the&nbsp;<i>root window</i>&nbsp;(it's the parent of all windows, just like the system's root directory is the parent of all subdirectories). Normally, applications don't use the root window, instead drawing all of their text inside of windows (<tt>newt</tt>&nbsp;doesn't require this though -- widgets may be placed directly on the root window without difficulty). It is often desirable to display some text, such as a program's name or copyright information, on the root window, however.&nbsp;<tt>Newt</tt>&nbsp;provides two ways of displaying text on the root window. These functions may be called at any time. They are the only&nbsp;<tt>newt</tt>&nbsp;functions which are meant to write outside of the current window.</p>
+	<h3>Draw Root Text</h3>
+
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtDrawRootText(byval col as long, byval row as long, byval text as const zstring ptr)</b></pre><p>This function is straightforward. It displays the zstring <tt>text</tt>&nbsp;at the position indicated. If either the&nbsp;<tt>left</tt>&nbsp;or&nbsp;<tt>top</tt>&nbsp;is negative, the position is measured from the opposite side of the screen. The final measurement will seem to be off by one though. For example, a&nbsp;<tt>top</tt>&nbsp;of -1 indicates the last line on the screen, and one of -2 is the line above that. As it's common to use the last line on the screen to display help information,&nbsp;<tt>newt</tt>&nbsp;includes special support for doing exactly that. </p>
+	<p><b>Example:</b></p>
+	
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+newtInit()
+newtCls()
+newtDrawRootText(0, 0, strptr(&quot;Some root text&quot;))
+newtRefresh()
+sleep
+newtFinished()</pre>
+	<h3>Help Line</h3><p>The last line on the display is known as the&nbsp;<i><b>help line</b></i>, and is treated as a <b>stack</b>. </p>
+	<p>As the value of the help line normally relates to the window currently displayed, using the same structure for window order and the help line is very natural. Three functions are provided to manipulate the help line.</p>
+
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtPushHelpLine(byval text as const zstring ptr)
+declare sub newtRedrawHelpLine()
+declare sub newtPopHelpLine()</b></pre>The first function,&nbsp;<tt>newtPushHelpLine()</tt>, saves the current help line on a stack (which is independent of the window stack) and displays the new line. 
+	<p>If&nbsp;<tt>text</tt>&nbsp;is&nbsp;<tt>NULL</tt>,&nbsp;'s default help line is displayed (which provides basic instructions on using).</p>
+	<p> If&nbsp;<tt>text</tt>&nbsp;is a string of length 0, the help line is cleared. For all other values of&nbsp;<tt>text</tt>, the passed string is displayed at the bottom, left-hand corner of the display. </p>
+	<p>The space between the end of the displayed string the the right-hand edge of the terminal is cleared.&nbsp;</p>
+	
+	<p><tt>newtRedrawHelpLine()</tt> redraws the help line.</p><p><tt>newtPopHelpLine()</tt>&nbsp;replaces the current help line with the one it replaced. It's important not to call <tt>newtPopHelpLine()</tt> more then&nbsp;!&nbsp;&nbsp;</p>
+	<p>By default,&nbsp;<tt>newtPushHelpLine()&nbsp;</tt>Suspending Newt Applications. </p>
+	<p><tt>newt</tt>&nbsp;programs cannot be suspended by the user (compare this to most Unix programs which can be suspended by pressing the suspend key (normally&nbsp;<tt>^Z</tt>). Instead, programs can specify a&nbsp;<i>callback</i>&nbsp;function which gets invoked when the user presses the suspend key.</p>
+	<p>The suspend function neither expects nor returns any value, and can do whatever it likes to, when it is invoked. </p>
+	<p>If no suspend callback is registered, the suspend keystroke is ignored. If the application should suspend and continue like most user applications, the suspend callback needs two other&nbsp;</p>
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>type newtSuspendCallback as sub(byval data as any ptr)
+declare sub newtSetSuspendCallback(byval cb as newtSuspendCallback, byval data as any ptr)</b></pre>The suspend function neither expects nor returns any value, and can do whatever it likes to when it is invoked. If no suspend callback is registered, the suspend keystroke is ignored. If the application should suspend and continue like most user applications, the suspend callback needs two other&nbsp;<tt>newt</tt>&nbsp;functions.
+
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtSuspend()
+declare function newtResume() as long</b></pre>
+	
+	<p><tt>newtSuspend()</tt>&nbsp;tells&nbsp;<tt>newt</tt>&nbsp;to return the terminal to its initial state. </p>
+	<p>Once this is done, the application can suspend itself (by sending itself a&nbsp;<tt>SIGTSTP</tt>, fork a child program, or do whatever else it likes. </p>
+	<p>When it wants to resume using the&nbsp;<tt>newt</tt>&nbsp;interface, it must call&nbsp;<tt>newtResume</tt>&nbsp;before doing so. </p>
+	<p>Note that suspend callbacks are not signal handlers. When&nbsp;<tt>newtInit()</tt>&nbsp;takes over the terminal, it disables the part of the terminal interface which sends the suspend signal. </p>
+	<p>Instead, if&nbsp;<tt>newt</tt>&nbsp;sees the suspend keystroke during normal input processing, it immediately calls the suspend callback if one has been set. </p>
+	<p>This means that suspending newt applications is not asynchronous.
+</p>
+	<p><b>Example:</b></p>
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">#Ifndef NULL
+  #Define NULL 0
+#Endif
+
+#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+newtInit()
+newtCls()
+
+    newtDrawRootText(0, 0, &quot;Some root text&quot;)
+    newtDrawRootText(-30, -2, &quot;Root text in the other corner&quot;)
+
+    newtPushHelpLine(NULL)
+    newtRefresh()
+    sleep
+
+    newtPushHelpLine(&quot;A help line&quot;)
+    newtRefresh()
+    sleep
+
+    newtPopHelpLine()
+    newtRefresh()
+    sleep
+
+    newtFinished()</pre>
+
+<h2><a name="2-4">2.4 Refreshing the Screen</a></h2>
+
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtRefresh()</b></pre>
+<p>To increase performance, S-Lang only updates the display when it needs to, not when the program tells S-Lang to write to the terminal. </p>
+	<p>``When it needs to'' is implemented as ``right before the newt wait for the user to press a key''. </p>
+	<p>While this allows for optimized screen displays most of the time, this optimization makes things difficult for programs which want to display progress messages without forcing the user to input characters. </p>
+	<p>Applications can force S-Lang to immediately update modified portions of the screen by calling&nbsp;<tt>newtRefresh()</tt>.</p><ol type="1"><li> <p>The program wants to display a progress message, without forcing for the user to enter any characters.</p></li><li> <p>A misfeature of the program causes part of the screen to be corrupted. Ideally, the program would be fixed, but that may not always be practical.</p></li></ol>
+	
+<h2><a name="2-5">2.5 Other Miscellaneous Functions</a></h2><p>As always, some function defy characterization.</p>
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtBell()
+declare sub newtDelay(byval usecs as ulong)
+declare sub newtCursorOff()
+declare sub newtCursorOn()
+declare sub newtGetScreenSize(byval cols as long ptr, byval rows as long ptr)</b>
+</pre>The first function, <tt>newtBell()</tt>, sends a beep to the terminal. &nbsp;	<p>Depending on the terminal's settings, this beep may or may not be audible. </p>
+	<p>The second function, <tt>newtDelay()</tt>, delays the execution of program for <tt>usecs</tt> seconds.</p>
+	<p>The function, <tt>newtCursorOff()</tt>, disables the cursor.</p>
+	<p>The function, <tt>newtCursorOn()</tt>, enables the cursor.</p>
+	<p>The&nbsp;function, <tt>newtGetScreenSize()</tt>, fills in the passed pointers with the current size of the terminal.
+</p><table border="0" width="100%">
+	<tbody>
+    <tr>
+      <td align="left"><a href="1.html">Prev</a></td>
+      <td align="center"><a href="index.html">Home</a></td>
+      <td align="right"><a href="3.html">Next</a></td></tr>
+	</tbody>
+</table></body></html>

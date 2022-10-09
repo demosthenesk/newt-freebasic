@@ -1,0 +1,440 @@
+﻿<html><body> 
+	<h1>Help documentation of newt-freebasic</h1>
+	
+	<table border="0" width="100%">
+	<tbody>
+    <tr>
+      <td align="left"><a href="3.html">Prev</a></td>
+      <td align="center"><a href="index.html">Home</a></td>
+      <td align="right">&nbsp;</td></tr>
+	</tbody>
+</table>
+<hr/>	
+<p><b>Table of Contents</b></p>
+	<ol start="4">
+		   <li><a href="4.html#4">Components</a>
+   <ol>
+      <li><a href="4.html#4-1">Introduction to Forms</a></li>
+      <li><a href="4.html#4-2">Components</a></li>
+      <li><a href="4.html#4-3">General Component Manipulation</a></li>
+      <li><a href="4.html#4-4">Buttons</a></li>
+      <li><a href="4.html#4-5">Labels</a></li>
+      <li><a href="4.html#4-6">Entry Boxes</a></li>
+      <li><a href="4.html#4-7">Checkboxes</a></li>
+      <li><a href="4.html#4-8">Radio Buttons</a></li>
+      <li><a href="4.html#4-9">Scales</a></li>
+      <li><a href="4.html#4-10">Textboxes</a><ol><li><a href="4.html#4-10-1">Reflowing Text</a></li></ol>
+      </li><li><a href="4.html#4-11">Scrollbars</a></li>
+      <li><a href="4.html#4-12">Listboxes</a>
+      <ol>
+         <li><a href="4.html#4-12-1">Basic Listboxes</a></li>
+         <li><a href="4.html#4-12-2">Manipulating Listbox Contents</a></li>
+         <li><a href="4.html#4-12-3">Multiple Selections</a></li>
+						</ol></li><li><a href="4.html#4-13">Advanced Forms</a> <ol>
+				</ol><ol><li><a href="4.html#4-13-1">Exiting From Forms</a></li>
+      </ol></li>
+   </ol></li>
+</ol>
+
+<h2><a name="4">4. Components</a></h2>
+		<p>Components are the basic user interface element&nbsp;<tt>newt</tt>&nbsp;provides. A single component may be (for example) a listbox, push button checkbox, a collection of other components. Most components are used to display information in a window, provide a place for the user to enter data, or a combination of these two functions. provides. A single component may be (for example) a listbox, push button checkbox, a collection of other components. Most components are used to display information in a window, provide a place for the user to enter data, or a combination of these two functions. </p>
+	<p>Forms, however, are a component whose primary purpose is not noticed by the user at all. Forms are collections of components (a form may contain another form) which logically relate the components to one another. Once a form is created and had all of its constituent components added to it, applications normally then run the form. This gives control of the application to the form, which then lets the user enter data onto the form. When the user is done (a number of different events qualify as ``done''), the form returns control to the part of the application which invoked it. The application may then read the information the user provided and continue appropriately. </p>
+	
+	<p>All&nbsp;<tt>newt</tt>&nbsp;components are stored in a common data type, a&nbsp;<tt>newtComponent</tt>&nbsp;(some of the particulars of&nbsp;<tt>newtComponent</tt>s have already been mentioned). While this makes it easy for programmers to pass components around, it does force them to make sure they don't pass entry boxes to routines expecting push buttons, as the compiler can't ensure that for them. </p>
+	<p>We start off with a brief introduction to forms. While not terribly complete, this introduction is enough to let us illustrate the rest of the components with some sample code. We'll then discuss the remainder of the components, and end this section with a more exhaustive description of forms.&nbsp;components are stored in a common data type, a<tt>newtComponent</tt>(some of the particulars of<tt>newtComponent</tt></p>
+
+<h2><a name="4-1">4.1 Introduction to Forms</a></h2>
+		<p>As we've mentioned, forms are simply collections of components. As only one form can be active (or running) at a time, every component which the user should be able to access must be on the running form (or on a subform of the running form). A form is itself a component, which means forms are stored in&nbsp;<tt>newtComponent</tt>&nbsp;data structures.</p>
+
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtForm(byval vertBar as newtComponent, byval helpTag as any ptr, byval flags as long) as newtComponent</b></pre>To create a form, call&nbsp;<tt>newtForm()</tt>. The first parameter is a vertical scrollbar which should be associated with the form. For now, that should always be&nbsp;<tt>NULL</tt>&nbsp;(we'll discuss how to create scrolling forms later in this section). The second parameter,&nbsp;<tt>help</tt>, is currently unused and should always be&nbsp;<tt>NULL</tt>. The&nbsp;<tt>flags</tt>&nbsp;is normally 0, and other values it can take will be discussed later. Now that we've waved away the complexity of this function, creating a form boils down to simply:
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">dim myForm as newtComponent<!--EndFragment-->
+myForm = newtForm(NULL, NULL, 0)</pre>After a form is created, components need to be added to it --- after all, an empty form isn't terribly useful. There are two functions which add components to a form.
+<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtFormAddComponent(byval form as newtComponent, byval co as newtComponent)
+declare sub newtFormAddComponents(byval form as newtComponent, ...)</b></pre>The first function,&nbsp;<tt>newtFormAddComponent()</tt>, adds a single component to the form which is passed as the first parameter. The second function is simply a convenience function. After passing the form to&nbsp;<tt>newtFormAddComponents()</tt>, an arbitrary number of components is then passed, followed by&nbsp;<tt>NULL</tt>. Every component passed is added to the form. Once a form has been created and components have been added to it, it's time to run the form.<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtRunForm(byval form as newtComponent) as newtComponent</b></pre>This function runs the form passed to it, and returns the component which caused the form to stop running. For now, we'll ignore the return value completely. Notice that this function doesn't fit in with&nbsp;<tt>newt</tt>'s normal naming convention. It is an older interface which will not work for all forms. It was left in&nbsp;<tt>newt</tt>&nbsp;only for legacy applications. It is a simpler interface than the new&nbsp;<tt>newtFormRun()</tt>&nbsp;though, and is still used quite often as a result. When an application is done with a form, it destroys the form and all of the components the form contains.<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtFormDestroy(byval form as newtComponent)</b>	</pre>This function frees the memory resources used by the form and all of the components which have been added to the form (including those components which are on subforms). Once a form has been destroyed, none of the form's components can be used.
+
+<h2><a name="4-2">4.2 Components</a></h2>
+		<p>Non-form components are the most important user-interface component for users. They determine how users interact with&nbsp;<tt>newt</tt>&nbsp;and how information is presented to them.and how information is presented to them.</p>
+
+<h2><a name="4-3">4.3 General Component Manipulation</a></h2>
+
+	<p>There are a couple of functions which work on more then one type of components. The description of each component indicates which (if any) of these functions are valid for that particular component.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>type newtCallback as sub(byval as newtComponent, byval as any ptr)
+declare sub newtComponentAddCallback(byval co as newtComponent, byval f as newtCallback, byval data as any ptr)
+declare sub newtComponentTakesFocus(byval co as newtComponent, byval val as long)</b></pre>The first registers a callback function for that component. A callback function is a function the application provides which&nbsp;&nbsp;calls for a particular component. Exactly when (if ever) the callback is invoked depends on the type of component the callback is attached to, and will be discussed for the components which support callbacks.&nbsp;
+	<p><tt>newtComponentTakesFocus()</tt>&nbsp;works on all components. It allows the application to change which components the user is allowed to select as the current component, and hence provide input to. </p>
+	<p>Components which do not take focus are skipped over during form traversal, but they are displayed on the terminal. </p>
+	<p>Some components should never be set to take focus, such as those which display static text.</p><h2><a name="4-4">4.4 Buttons</a></h2>
+		<p>Nearly all forms contain at least one button.&nbsp;<tt>Newt</tt>&nbsp;buttons come in two flavors, full buttons and compact buttons. Full buttons take up quit a bit of screen space, but look much better then the single-row compact buttons. Other then their size, both button styles behave identically. Different functions are used to create the two types of buttons.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtButton(byval left as long, byval top as long, byval text as const zstring ptr) as newtComponent
+<!--EndFragment-->declare function newtCompactButton(byval left as long, byval top as long, byval text as const zstring ptr) as newtComponent</b>
+</pre>Both functions take identical parameters. The first two parameters are the location of the upper left corner of the button, and the final parameter is the text which should be displayed in the button (such as ``Ok'' or ``Cancel'').
+	<p><b>Example:</b></p>
+	
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">#Ifndef NULL
+  #Define NULL 0
+#Endif
+
+#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+dim button as newtComponent
+dim form as newtComponent
+
+
+newtInit()
+newtCls()
+
+button = newtButton(0, 0, &quot;Exit&quot;)
+form = newtForm(NULL, NULL, 0)
+newtFormAddComponents(form, button, NULL)
+
+newtRunForm(form)
+newtFinished()
+newtFormDestroy(form)</pre>
+<p><b>Example:</b><b></b></p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">#Ifndef NULL
+  #Define NULL 0
+#Endif
+
+#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+    dim form as newtComponent
+    dim b1 as newtComponent
+    dim b2 as newtComponent
+    
+    newtInit()
+    newtCls()
+
+    newtOpenWindow(10, 5, 40, 6, &quot;Button Sample&quot;)
+
+    b1 = newtButton(10, 1, &quot;Ok&quot;)
+    b2 = newtCompactButton(22, 2, &quot;Cancel&quot;)
+    form = newtForm(NULL, NULL, 0)
+    newtFormAddComponents(form, b1, b2, NULL)
+
+    newtRunForm(form)
+
+    newtFormDestroy(form)
+    newtFinished()</pre>
+
+<h2><a name="4-5">4.5 Labels</a></h2>
+
+	<p>&nbsp;Labels are <tt>newt</tt>'s simplest component. They display some given text and don't allow any user input.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtLabel(byval left as long, byval top as long, byval text as const zstring ptr) as newtComponent
+declare sub newtLabelSetText(byval co as newtComponent, byval text as const zstring ptr)</b></pre>Creating a label is just like creating a button; just pass the location of the label and the text it should display. 
+	<p>Unlike buttons, labels do let the application change the text in the label with&nbsp;<tt>newtLabelSetText</tt>. </p>
+	<p>When the label's text is changed, the label automatically redraws itself. It does not clear out any old text which may be leftover from the previous time is was displayed, however, so be sure that the new text is at least as long as the old text.</p><h2><a name="4-6">4.6 Entry Boxes</a></h2>
+<p>Entry boxes allow the user to enter a text string into the form which the application can later retrieve.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>type newtEntryFilter as function(byval entry as newtComponent, byval data as any ptr, byval ch as long, byval cursor as long) as long
+
+declare function newtEntry(byval left as long, byval top as long, byval initialValue as const zstring ptr, byval width as long,_
+     byval resultPtr as const zstring ptr ptr, byval flags as long) as newtComponent
+
+declare sub newtEntrySet(byval co as newtComponent, byval value as const zstring ptr, byval cursorAtEnd as long)
+
+declare sub newtEntrySetFilter(byval co as newtComponent, byval filter as newtEntryFilter, byval data as any ptr)
+
+declare function newtEntryGetValue(byval co as newtComponent) as zstring ptr</b></pre><p><tt>newtEntry()</tt>&nbsp;creates a new entry box. After the location of the entry box, the initial value for the entry box is passed, which may be&nbsp;<tt>NULL</tt>&nbsp;if the box should start off empty. Next, the width of the physical box is given. This width may or may not limit the length of the string the user is allowed to enter; that depends on the&nbsp;<tt>flags</tt>. </p>
+	<p>The&nbsp;<tt>resultPtr</tt> must be the address of a zstring ptr. Until the entry box is destroyed by <tt>newtFormDestroy()</tt>, that zstring ptr<!--EndFragment-->&nbsp;will point to the current value of the entry box. It's important that applications make a copy of that value before destroying the form if they need to use it later. </p>
+	<p>The <tt>resultPtr</tt>&nbsp;may be&nbsp;<tt>NULL</tt>, in which case the user must use the&nbsp;<tt>newtEntryGetValue()</tt>&nbsp;function to get the value of the entry box. </p>
+	<p>Entry boxes support a number of flags:</p><p><b>NEWT_ENTRY_SCROLL</b></p><div> <dl><dd> <p>If this flag is not specified, the user cannot enter text into the entry box which is wider then the entry box itself. This flag removes this limitation, and lets the user enter data of an arbitrary length.</p></dd><dt><b>NEWT_FLAG_HIDDEN</b></dt><dd> <p>If this flag is specified, the value of the entry box is not displayed. This is useful when the application needs to read a password, for example.</p></dd><dt><b>NEWT_FLAG_RETURNEXIT</b></dt><dd> <p>When this flag is given, the entry box will cause the form to stop running if the user pressed return inside of the entry box. This can provide a nice shortcut for users.</p></dd></dl></div>After an entry box has been created, its contents can be set by&nbsp;<tt>newtEntrySet()</tt>. 
+	<p>After the entry box itself, the new string to place in the entry box is passed. </p>
+	<p>The final parameter,&nbsp;<tt>cursorAtEnd</tt>, controls where the cursor will appear in the entry box. If it is zero, the cursor remains at its present location; a nonzero value moves the cursor to the end of the entry box's new value. </p>
+	<p>While the simplest way to find the value of an entry box is by using a&nbsp;<tt>resultPtr</tt>, doing so complicates some applications.&nbsp;<tt>newtEntryGetValue()</tt>&nbsp;returns a pointer to the string which the entry box currently contains. The returned pointer may not be valid once the user further modifies the entry box, and will not be valid after the entry box has been destroyed, so be sure to save its value in a more permanent location if necessary. </p>
+	<p>Entry boxes allow applications to filter characters as they are entered. This allows programs to ignore characters which are invalid (such as entering a ^ in the middle of a phone number) and provide intelligent aids to the user (such as automatically adding a '.' after the user has typed in the first three numbers in an IP address). When a filter is registered through&nbsp;<tt>newtEntrySetFilter()</tt>, both the filter itself and an arbitrary any ptr, which passed to the filter whenever it is invoked, are recorded. This data pointer isn't used for any other purpose, and may be <tt>NULL</tt>. Entry filters take four arguments.</p><p>The entry box which had data entered into it</p><ol type="1"><li> <p>The data pointer which was registered along with the filter</p></li><li> <p>The new character which&nbsp;<tt>newt</tt>&nbsp;is considering inserting into the entry box</p></li><li> <p>The current cursor position (0 is the leftmost position)</p></li></ol>The filter returns 0 if the character should be ignored, or the value of the character which should be inserted into the entry box. Filter functions which want to do complex manipulations of the string should use&nbsp;<tt>newtEntrySet()</tt>&nbsp;to update the entry box and then return 0 to prevent the new character from being inserted. When a callback is attached to a entry box, the callback is invoked whenever the user moves off of the callback and on to another component.
+	<p>&nbsp;<b>Example:</b></p>
+	
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">#Ifndef NULL
+  #Define NULL 0
+#Endif
+
+#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+    dim form as newtComponent
+    dim label as newtComponent
+    dim entry as newtComponent
+    dim button as newtComponent
+    dim entryValue as zstring ptr
+
+    newtInit()
+    newtCls()
+
+    newtOpenWindow(10, 5, 40, 8, &quot;Entry and Label Sample&quot;)
+
+    label = newtLabel(1, 1, &quot;Enter a string&quot;)
+    entry = newtEntry(16, 1, &quot;sample&quot;, 20, @entryValue, NEWT_FLAG_SCROLL OR NEWT_FLAG_RETURNEXIT)
+    button = newtButton(17, 3, &quot;Ok&quot;)
+    form = newtForm(NULL, NULL, 0)
+    newtFormAddComponents(form, label, entry, button, NULL)
+
+    newtRunForm(form)
+
+    newtFinished()
+
+    print(&quot;Final string was: &quot; &amp; *entryValue)
+
+    /' We cannot destroy the form until after we've used the value
+       from the entry widget. '/
+    newtFormDestroy(form)  </pre><h2><a name="4-7">4.7 Checkboxes</a></h2>
+	<p>Most widget sets include checkboxes which toggle between two value (checked or not checked).&nbsp;</p>
+	<p><tt>Newt</tt>&nbsp;checkboxes are more flexible. When the user presses the space bar on a checkbox, the checkbox's value changes to the next value in an arbitrary sequence (which wraps). </p>
+	<p>Most checkboxes have two items in that sequence, checked or not, but&nbsp;<tt>newt</tt>&nbsp;allows an arbitrary number of value. This is useful when the user must pick from a limited number of choices. Each item in the sequence is a single character, and the sequence itself is represented as a string. </p>
+	<p>The checkbox components displays the character which currently represents its value the left of a text label, and returns the same character as its current value. The default sequence for checkboxes is&nbsp;<tt>&quot; *&quot;</tt>, with&nbsp;<tt>' '</tt>&nbsp;indicating false and&nbsp;<tt>'*'</tt>&nbsp;true.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtCheckbox(byval left as long, byval top as long, byval text as const zstring ptr,_
+        byval defValue as byte, byval seq as const zstring ptr, byval result as zstring ptr) as newtComponent
+declare function newtCheckboxGetValue(byval co as newtComponent) as byte
+declare sub newtCheckboxSetValue(byval co as newtComponent, byval value as byte)
+declare sub newtCheckboxSetFlags(byval co as newtComponent, byval flags as long, byval sense as newtFlagsSense)</b></pre><p>Like most components, the position of the checkbox is the first thing passed to the function that creates one. </p>
+	<p>The next parameter,&nbsp;<tt>text</tt>, is the text which is displayed to the right of the area which is checked. </p>
+	<p>The&nbsp;<tt>defValue</tt>&nbsp;is the initial value for the checkbox, and&nbsp;<tt>seq</tt>&nbsp;is the sequence which the checkbox should go through (<tt>defValue</tt>&nbsp;must be in&nbsp;<tt>seq</tt>.&nbsp;<tt>seq</tt>&nbsp;may be&nbsp;<tt>NULL</tt>, in which case&nbsp;<tt>&quot; *&quot;</tt>&nbsp;is used. </p>
+	<p>The final parameter,&nbsp;<tt>result</tt>, should point to a character which the checkbox should always record its current value in. </p>
+	<p>If&nbsp;<tt>result</tt>&nbsp;is&nbsp;<tt>NULL</tt>,&nbsp;<tt>newtCheckboxGetValue()</tt>&nbsp;must be used to get the current value of the checkbox.&nbsp;</p>
+	<p><tt>newtCheckboxGetValue()</tt>&nbsp;is straightforward, returning the character in the sequence which indicates the current value of the checkbox If a callback is attached to a checkbox, the callback is invoked whenever the checkbox responds to a user's keystroke. </p>
+	<p>The entry box may respond by taking focus or giving up focus, as well as by changing its current value.
+
+<tt>result</tt><tt>NULL</tt>&nbsp;</p><h2><a name="4-8">4.8 Radio Buttons</a></h2>
+	<p>Radio buttons look very similar to checkboxes. The key difference between the two is that radio buttons are grouped into sets, and exactly one radio button in that set may be turned on. If another radio button is selected, the button which was selected is automatically deselected.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtRadiobutton(byval left as long, byval top as long, byval text as const zstring ptr,_
+        byval isDefault as long, byval prevButton as newtComponent) as newtComponent
+declare function newtRadioGetCurrent(byval setMember as newtComponent) as newtComponent
+declare sub newtRadioSetCurrent(byval setMember as newtComponent)</b></pre>
+		<p>Each radio button is created by calling&nbsp;<tt>newtRadiobutton()</tt>. </p>
+	<p>After the position of the radio button, the text displayed with the button is passed.&nbsp;</p>
+	<p><tt>isDefault</tt>&nbsp;should be nonzero if the radio button is to be turned on by default. </p>
+	<p>The final parameter,&nbsp;<tt>prevMember</tt>&nbsp;is used to group radio buttons into sets. If&nbsp;<tt>prevMember</tt>&nbsp;is&nbsp;<tt>NULL</tt>, the radio button is assigned to a new set. If the radio button should belong to a preexisting set,&nbsp;<tt>prevMember</tt>&nbsp;must be the previous radio button added to that set. </p>
+	<p>Discovering which radio button in a set is currently selected necessitates&nbsp;<tt>newtRadioGetCurrent()</tt>. </p>
+	<p>It may be passed any radio button in the set you're interested in, and it returns the radio button component currently selected.
+
+</p>
+	<p><b>Example:</b></p>
+	
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">#Ifndef NULL
+  #Define NULL 0
+#Endif
+
+#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+    dim form as newtComponent
+    dim checkbox as newtComponent
+    dim button as newtComponent
+    dim rb(0 to 2) as newtComponent
+    dim cbValue as zstring ptr
+    dim byteValue as byte = 0
+    dim i as integer
+
+    newtInit()
+    newtCls()
+
+    newtOpenWindow(10, 5, 40, 11, &quot;Checkboxes and Radio buttons&quot;)
+
+    checkbox = newtCheckbox(1, 1, &quot;A checkbox&quot;, byteValue, &quot; *X&quot;, @cbValue)
+
+    rb(0) = newtRadiobutton(1, 3, &quot;Choice 1&quot;, 1, NULL)
+    rb(1) = newtRadiobutton(1, 4, &quot;Choice 2&quot;, 0, rb(0))
+    rb(2) = newtRadiobutton(1, 5, &quot;Choice 3&quot;, 0, rb(1))
+
+    button = newtButton(1, 7, &quot;Ok&quot;)
+
+    form = newtForm(NULL, NULL, 0)
+    newtFormAddComponent(form, checkbox)
+    for i = 0 to 2
+    	newtFormAddComponent(form, rb(i))
+    next
+    
+    newtFormAddComponent(form, button)
+
+    newtRunForm(form)
+    newtFinished()
+
+    /' We cannot destroy the form until after we've found the current
+       radio button '/
+
+    for i = 0 to 2
+	    if newtRadioGetCurrent(rb(0)) = rb(i) then
+	        print(&quot;radio button picked: &quot; &amp; i)
+	    end if
+	next
+    newtFormDestroy(form)
+
+    /' But the checkbox's value is stored locally '/
+    print(&quot;checkbox value: &quot; &amp; cbValue)
+</pre>
+
+
+	<h2><a name="4-9">4.9 Scales</a></h2><p>&nbsp;It's common for programs to need to display a progress meter on the terminal while it performs some length operation (it behaves like an anesthetic). The scale component is a simple way of doing this. It displays a horizontal bar graph which the application can update as the operation continues.</p><div> <pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtScale(byval left as long, byval top as long, byval width as long, byval fullValue as longint) as newtComponent
+declare sub newtScaleSet(byval co as newtComponent, byval amount as ulongint)</b></pre>When the scale is created with&nbsp;<tt>newtScale</tt>, it is given the width of the scale itself as well as the value which means that the scale should be drawn as full. </div><div>When the position of the scale is set with&nbsp;<tt>newtScaleSet()</tt>, the scale is told the amount of the scale which should be filled in relative to the&nbsp;<tt>fullAmount</tt>. </div>
+	<div>For example, if the application is copying a file,&nbsp;<tt>fullValue</tt>&nbsp;could be the number of bytes in the file, and when the scale is updated&nbsp;<tt>newtScaleSet()</tt>&nbsp;would be passed the number of bytes which have been copied so far.&nbsp;</div>
+	<h2><a name="4-10">4.10 Textboxes</a></h2><p>Textboxes display a block of text on the terminal, and is appropriate for display large amounts of text.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtTextbox(byval left as long, byval top as long, byval width as long, byval height as long, byval flags as long) as newtComponent
+declare sub newtTextboxSetText(byval co as newtComponent, byval text as const zstring ptr)
+declare sub newtTextboxSetHeight(byval co as newtComponent, byval height as long)
+</b></pre><tt>newtTextbox()</tt>&nbsp;creates a new textbox, but does not fill it with data. The function is passed the location for the textbox on the screen, the width and height of the textbox (in characters), and zero or more of the following flags:<div> <dl><dt>NEWT_FLAG_WRAP</dt><dd> <p>All text in the textbox should be wrapped to fit the width of the textbox. If this flag is not specified, each newline delimited line in the text is truncated if it is too long to fit. When&nbsp;<tt>newt</tt>&nbsp;wraps text, it tries not to break lines on spaces or tabs. Literal newline characters are respected, and may be used to force line breaks.</p>
+				</dd><dt>NEWT_FLAG_SCROLL</dt><dd> 
+<p>The text box should be scrollable. When this option is used, the scrollbar which is added increases the width of the area used by the textbox by 2 characters; that is the textbox is 2 characters wider then the width passed to&nbsp;newtTextbox().</p>
+
+<p>After a textbox has been created, text may be added to it through&nbsp;<tt>newtTextboxSetText()</tt>, which takes only the textbox and the new text as parameters. If the textbox already contained text, that text is replaced by the new text. The textbox makes its own copy of the passed text, so these is no need to keep the original around unless it's convenient.</p></dd></dl></div>
+	
+
+		<h2><a name="4-10-1">4.10.1 Reflowing Text</a></h2>
+	<p>When applications need to display large amounts of text, it's common not to know exactly where the linebreaks should go. </p>
+	<p>While textboxes are quite willing to scroll the text, the programmer still must know what width the text will look ``best'' at (where ``best'' means most exactly rectangular; no lines much shorter or much longer then the rest). </p>
+	<p>This common is especially prevalent in internationalized programs, which need to make a wide variety of message string look god on a screen. </p>
+	<p>To help with this, <tt>newt</tt>&nbsp;provides routines to reformat text to look good. </p>
+	<p>It tries different widths to figure out which one will look ``best'' to the user. </p>
+	<p>As these commons are almost always used to format text for textbox components,&nbsp;<tt>newt</tt>&nbsp;makes it easy to construct a textbox with reflowed text.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtReflowText(byval text as zstring ptr, byval width as long, byval flexDown as long, byval flexUp as long,_
+        byval actualWidth as long ptr, byval actualHeight as long ptr) as zstring ptr
+declare function newtTextboxReflowed(byval left as long, byval top as long, byval text as zstring ptr, byval width as long,_
+        byval flexDown as long, byval flexUp as long, byval flags as long) as newtComponent
+declare function newtTextboxGetNumLines(byval co as newtComponent) as long</b><!--EndFragment--></pre><p><tt>newtReflowText()</tt>&nbsp;reflows the&nbsp;<tt>text</tt>&nbsp;to a target width of&nbsp;<tt>width</tt>. </p>
+	<p>The actual width of the longest line in the returned string is between&nbsp;<tt>width - flexDown</tt>&nbsp;and&nbsp;<tt>width + flexUp</tt>; the actual maximum line length is chosen to make the displayed check look rectangular. </p>
+	<p>The&nbsp;<tt>int</tt>s pointed to by&nbsp;<tt>actualWidth</tt>&nbsp;and&nbsp;<tt>actualHeight</tt>&nbsp;are set to the width of the longest line and the number of lines in in the returned text, respectively. Either one may be&nbsp;<tt>NULL</tt>. </p>
+	<p>The return value points to the reflowed text, and is allocated through&nbsp;<tt>malloc()</tt>. </p>
+	<p>When the reflowed text is being placed in a textbox it may be easier to use&nbsp;<tt>newtTextboxReflowed()</tt>, which creates a textbox, reflows the text, and places the reflowed text in the listbox. </p>
+	<p>It's parameters consist of the position of the final textbox, the width and flex values for the text (which are identical to the parameters passed to&nbsp;<tt>newtReflowText()</tt>, and the flags for the textbox (which are the same as the flags for&nbsp;<tt>newtTextbox()</tt>. </p>
+	<p>This function does not let you limit the height of the textbox, however, making limiting it's use to constructing textboxes which don't need to scroll. </p>
+	<p>To find out how tall the textbox created by&nbsp;<tt>newtTextboxReflowed()</tt>&nbsp;is, use&nbsp;<tt>newtTextboxGetNumLines()</tt>, which returns the number of lines in the textbox. </p>
+	<p>For textboxes created by&nbsp;<tt>newtTextboxReflowed()</tt>, this is always the same as the height of the textbox. </p>
+	<p><b>Example:</b></p>
+	
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">#Ifndef NULL
+  #Define NULL 0
+#Endif
+
+#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+    dim form as newtComponent
+    dim text as newtComponent
+    dim button as newtComponent
+    dim txt as string
+ 
+    txt = &quot;This is a pretty long message. It will be displayed in a newt textbox, and illustrates how to construct a textbox from arbitrary text which may not have very good line breaks. Notice how literal characters are respected, and may be used to force line breaks and blank lines.&quot;
+   
+    newtInit()
+    newtCls()
+
+    text = newtTextboxReflowed(1, 1, StrPtr(txt), 30, 5, 5, 0)
+    button = newtButton(12, newtTextboxGetNumLines(text) + 2, &quot;Ok&quot;)
+
+    newtOpenWindow(10, 5, 37, newtTextboxGetNumLines(text) + 7, &quot;Textboxes&quot;)
+
+    form = newtForm(NULL, NULL, 0)
+    newtFormAddComponents(form, text, button, NULL)
+
+    newtRunForm(form)
+    newtFormDestroy(form)
+    newtFinished()
+</pre>	
+
+		<h2><a name="4-11">4.11 Scrollbars</a></h2><p>Scrollbars (which, currently, are always vertical in&nbsp;<tt>newt</tt>), may be attached to forms to let them contain more data then they have space for. </p>
+	<p>While the actual process of making scrolling forms is discussed at the end of this section, we'll go ahead and introduce scrollbars now so you'll be ready.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtVerticalScrollbar(byval left as long, byval top as long, byval height as long, byval normalColorset as long,_
+        byval thumbColorset as long) as newtComponent</b></pre>When a scrollbar is created, it is given a position on the screen, a height, and two colors. 
+	<p>The first color is the color used for drawing the scrollbar, and the second color is used for drawing the thumb. </p>
+	<p>This is the only place in newt where an application specifically sets colors for a component. </p>
+	<p>It's done here to let the colors a scrollbar use match the colors of the component the scrollbar is mated too. </p>
+	<p>When a scrollbar is being used with a form,&nbsp;<tt>normalColorset</tt>&nbsp;is often&nbsp;<tt>NEWT_COLORSET_WINDOW</tt>&nbsp;and&nbsp;<tt>thumbColorset</tt>&nbsp;<tt>NEWT_COLORSET_ACTCHECKBOX</tt>. </p>
+	<p>Of course, feel free to peruse&nbsp;<tt>&lt;newt.bi&gt;</tt>&nbsp;and pick your own colors. </p>
+	<p>As the scrollbar is normally updated by the component it is mated with, there is no public interface for moving the thumb.	
+</p><h2><a name="4-12">4.12 Listboxes</a></h2><p>Listboxes are the most complicated components&nbsp;<tt>newt</tt>&nbsp;provides. </p>
+	<p>They can allow a single selection or multiple selection, and are easy to update. </p>
+	
+	<p>Unfortunately, their API is also the least consistent of&nbsp;<tt>newt</tt>'s components. </p>
+	<p>Each entry in a listbox is a ordered pair of the text which should be displayed for that item and a&nbsp;<i>key</i>, which is a any ptr that uniquely identifies that listbox item. </p>
+	<p>Many applications pass integers in as keys, but using arbitrary pointers makes many applications significantly easier to code.</p>
+<h2><a name="4-12-1">4.12.1 Basic Listboxes</a></h2><p>Let's start off by looking at the most important listbox functions.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtListbox(byval left as long, byval top as long, byval height as long, byval flags as long) as newtComponent
+declare function newtListboxAppendEntry(byval co as newtComponent, byval text as const zstring ptr, byval data as const any ptr) as long
+declare function newtListboxGetCurrent(byval co as newtComponent) as any ptr
+declare sub newtListboxSetWidth(byval co as newtComponent, byval width as long)
+declare sub newtListboxSetCurrent(byval co as newtComponent, byval num as long)
+declare sub newtListboxSetCurrentByKey(byval co as newtComponent, byval key as any ptr)</b>
+</pre><p>A listbox is created at a certain position and a given height. The&nbsp;<tt>height</tt>&nbsp;is used for two things. First of all, it is the minimum height the listbox will use. If there are less items in the listbox then the height, suggests the listbox will still take up that minimum amount of space. Secondly, if the listbox is set to be scrollable (by setting the&nbsp;, the&nbsp;&nbsp;is also the maximum height of the listbox. If the listbox may not scroll, it increases its height to display all of its items. The following flags may be used when creating a listbox:&nbsp;is also the maximum height of the listbox. If the listbox may not scroll, it increases its height to display all of its items. The following flags may be used when creating a listbox:</p><p><b>NEWT_FLAG_SCROLL</b></p><div> <dl><dd> <p>The listbox should scroll to display all of the items it contains.</p></dd><dt><b>NEWT_FLAG_RETURNEXIT</b></dt><dd> <p>When the user presses return on an item in the list, the form should return.</p></dd><dt><b>NEWT_FLAG_BORDER</b></dt><dd> <p>A frame is drawn around the listbox, which can make it easier to see which listbox has the focus when a form contains multiple listboxes.</p></dd><dt><b>NEWT_FLAG_MULTIPLE</b></dt><dd> <p>By default, a listbox only lets the user select one item in the list at a time. When this flag is specified, they may select multiple items from the list.</p></dd></dl></div><p>Once a listbox has been created, items are added to it by invoking&nbsp;<tt>newtListboxAppendEntry()</tt>, which adds new items to the end of the list. </p>
+	<p>In addition to the listbox component,&nbsp;<tt>newtListboxAppendEntry()</tt>&nbsp;needs both elements of the (text, key) ordered pair. </p>
+	<p>For lists which only allow a single selection,&nbsp;<tt>newtListboxGetCurrent()</tt>&nbsp;should be used to find out which listbox item is currently selected. </p>
+	<p>It returns the key of the currently selected item. Normally, a listbox is as wide as its widest element, plus space for a scrollbar if the listbox is supposed to have one. </p>
+	<p>To make the listbox any larger then that, use&nbsp;<tt>newtListboxSetWidth()</tt>, which overrides the natural list of the listbox. </p>
+	<p>Once the width has been set, it's fixed. The listbox will no longer grow to accommodate new entries, so bad things may happen! </p>
+	<p>An application can change the current position of the listbox (where the selection bar is displayed) by calling&nbsp;<tt>newtListboxSetCurrent()</tt>&nbsp;or&nbsp;<tt>newtListboxSetCurrentByKey()</tt>. </p>
+	<p>The first sets the current position to the entry number which is passed as the second argument, with 0 indicating the first entry.&nbsp;</p>
+	<p><tt>newtListboxSetCurrentByKey()</tt>&nbsp;sets the current position to the entry whose&nbsp;<tt>key</tt>&nbsp;is passed into the function.</p>	
+<h2><a name="4-12-2">4.12.2 Manipulating Listbox Contents</a></h2><p>While the contents of many listboxes never need to change, some applications need to change the contents of listboxes regularly.&nbsp;</p>
+	<p><tt>Newt</tt>&nbsp;includes complete support for updating listboxes. </p>
+	<p>These new functions are in addition to&nbsp;<tt>newtListboxAppendEntry()</tt>, which was already discussed.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtListboxSetEntry(byval co as newtComponent, byval num as long, byval text as const zstring ptr)
+declare function newtListboxAppendEntry(byval co as newtComponent, byval text as const zstring ptr, byval data as const any ptr) as long
+declare function newtListboxAddEntry alias &quot;newtListboxAppendEntry&quot;(byval co as newtComponent, byval text as const zstring ptr,_
+        byval data as const any ptr) as long
+declare function newtListboxInsertEntry(byval co as newtComponent, byval text as const zstring ptr, byval data as const any ptr,_
+        byval key as any ptr) as long
+declare function newtListboxDeleteEntry(byval co as newtComponent, byval data as any ptr) as long
+declare sub newtListboxClear(byval co as newtComponent)</b>
+</pre>
+	<p>The first of these,&nbsp;<tt>newtListboxSetEntry()</tt>, updates the text for a key which is already in the listbox. </p>
+	<p>The&nbsp;<tt>key</tt>&nbsp;specifies which listbox entry should be modified, and&nbsp;<tt>text</tt>&nbsp;becomes the new text for that entry in the listbox.&nbsp;</p>
+	<p><tt>newtListboxInsertEntry()</tt>&nbsp;inserts a new listbox entry&nbsp;<i>after</i>&nbsp;an already existing entry, which is specified by the&nbsp;<tt>key</tt>&nbsp;parameter. </p>
+	<p>The&nbsp;<tt>text</tt>&nbsp;and&nbsp;<tt>data</tt>&nbsp;parameters specify the new entry which should be added. </p>
+	<p>Already-existing entries are removed from a listbox with&nbsp;<tt>newtListboxDeleteEntry()</tt>. It removes the listbox entry with the specified&nbsp;<tt>key</tt>. </p>
+	<p>If you want to remove all of the entries from a listbox, use&nbsp;<tt>newtListboxClear()</tt>.</p>	
+<h2><a name="4-12-3">4.12.3 Multiple Selections</a></h2>
+<p>When a listbox is created with&nbsp;<tt>NEWT_FLAG_MULTIPLE</tt>, the user can select multiple items from the list. </p>
+	<p>When this option is used, a different set of functions must be used to manipulate the listbox selection.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtListboxClearSelection(byval co as newtComponent)
+<!--EndFragment-->declare function newtListboxGetSelection(byval co as newtComponent, byval numitems as long ptr) as any ptr ptr
+declare sub newtListboxSelectItem(byval co as newtComponent, byval key as const any ptr, byval sense as newtFlagsSense)
+declare function newtListboxItemCount(byval co as newtComponent) as long</b>
+</pre>
+	<p>The simplest of these is&nbsp;<tt>newtListboxClearSelection()</tt>, which deselects all of the items in the list (listboxes which allow multiple selections also allow zero selections).&nbsp;</p>
+	<p><tt>newtListboxGetSelection()</tt>&nbsp;returns a pointer to an array which contains the keys for all of the items in the listbox currently selected. </p>
+	<p>The&nbsp;<tt>int</tt>&nbsp;pointed to by&nbsp;<tt>numitems</tt>&nbsp;is set to the number of items currently selected (and hence the number of items in the returned array). </p>
+	<p>The returned array is dynamically allocated, and must be released through&nbsp;<tt>free()</tt>.&nbsp;</p>
+	<p><tt>newtListboxSelectItem()</tt>&nbsp;lets the program select and deselect specific listbox entries. </p>
+	<p>The&nbsp;<tt>key</tt>&nbsp;of the listbox entry is being affected is passed, and&nbsp;<tt>sense</tt>&nbsp;is one of&nbsp;<tt>NEWT_FLAGS_RESET</tt>, which deselects the entry,&nbsp;<tt>NEWT_FLAGS_SET</tt>, which selects the entry, or&nbsp;<tt>NEWT_FLAGS_TOGGLE</tt>, which reverses the current selection status.</p><h2><a name="4-13">4.13 Advanced Forms</a></h2>
+<p>Forms, which tie components together, are quite important in the world of&nbsp;<tt>newt</tt>. is one of<tt>NEWT_FLAGS_RESET</tt>&nbsp;, which reverses the current selection status.</p>
+	<p>While we've already discussed the basics of forms, we've omitted many of the details.</p>
+	<h2><a name="4-13-1">4.13.1 Exiting From Forms</a></h2><div> <div> <div> <p>Forms return control to the application for a number of reasons:</p><ul><li> <p>A component can force the form to exit. Buttons do this whenever they are pushed, and other components exit when&nbsp;<tt>NEWT_FLAG_RETURNEXIT</tt>&nbsp;has been specified.</p></li><li> <p>Applications can setup hot keys which cause the form to exit when they are pressed.</p></li><li> <p><tt>Newt</tt>&nbsp;can exit when file descriptors are ready to be read or ready to be written to.</p></li></ul>By default,&nbsp;<tt>newt</tt>&nbsp;forms exit when the F12 key is pressed (F12 is setup as a hot key by default).&nbsp;</div>
+			<div><tt>Newt</tt>&nbsp;applications should treat F12 as an ``Ok'' button. </div>
+			<div>If applications don't want F12 to exit the form, they can specify&nbsp;<tt>NEWT_FLAG_NOF12</tt>&nbsp;as flag when creating the form with&nbsp;<tt>newtForm</tt>.<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtFormAddHotKey(byval co as newtComponent, byval key as long)
+declare sub newtFormWatchFd(byval form as newtComponent, byval fd as long, byval fdFlags as long)</b></pre><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare sub newtDrawForm(byval form as newtComponent)
+declare function newtFormGetCurrent(byval co as newtComponent) as newtComponent
+declare sub newtFormSetCurrent(byval co as newtComponent, byval subco as newtComponent)
+declare sub newtFormRun(byval co as newtComponent, byval es as newtExitStruct ptr)</b></pre><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtForm(byval vertBar as newtComponent, byval helpTag as any ptr, byval flags as long) as newtComponent
+declare sub newtFormSetBackground(byval co as newtComponent, byval color as long)
+declare sub newtFormSetHeight(byval co as newtComponent, byval height as long)
+declare sub newtFormSetWidth(byval co as newtComponent, byval width as long)</b></pre></div></div></div>
+	<p><b>Example submitting a form:</b></p>
+	
+	<pre style="background-color:#d6d6d6;font-family:'Courier New', monospace">/' This file was written by Angelo Rosina aka angros47 '/
+
+#Ifndef NULL
+  #Define NULL 0
+#Endif
+
+#inclib &quot;newt&quot;
+#include &quot;newt.bi&quot;
+
+    dim form as newtComponent
+    dim b1 as newtComponent
+    dim b2 as newtComponent
+    dim p as newtComponent
+
+	sub fCallback()
+		newtCls()
+		newtDrawRootText(0, 0, strptr(&quot;I am in callback!&quot;))
+		newtRefresh()
+	end sub
+    
+    newtInit()
+    newtCls()
+
+    newtOpenWindow(10, 5, 40, 6, &quot;Button Sample&quot;)
+
+    b1 = newtButton(10, 1, &quot;Ok&quot;)
+
+    b2 = newtCompactButton(22, 2, &quot;Cancel&quot;)
+    form = newtForm(NULL, NULL, 0)
+    newtFormAddComponents(form, b1, b2, NULL)
+
+    p=newtRunForm(form)
+	if p=b1 then fCallback()
+	sleep
+    newtFormDestroy(form)
+    newtFinished()</pre><hr/><table border="0" width="100%">
+	<tbody>
+    <tr>
+      <td align="left"><a name="4-12-2"><a name="4-13"><a href="3.html">Prev</a></a></a></td>
+      <td align="center"><a name="4-12-2"><a name="4-13"><a href="index.html">Home</a></a></a></td>
+      <td align="right"><a name="4-12-2"><a name="4-13">&nbsp;</a></a></td></tr>
+	</tbody>
+</table><p></p></body></html>
