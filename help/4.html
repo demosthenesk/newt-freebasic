@@ -113,9 +113,12 @@ newtFormDestroy(form)</pre>
     newtRunForm(form)
 
     newtFormDestroy(form)
-    newtFinished()</pre>
+    newtFinished()
+</pre>
 
-<h2><a name="4-5">4.5 Labels</a></h2>
+
+	<p><b>Screenshot</b></p>
+	<p><img alt="3" title="3" src="3.png"/></p><h2><a name="4-5">4.5 Labels</a></h2>
 
 	<p>&nbsp;Labels are <tt>newt</tt>'s simplest component. They display some given text and don't allow any user input.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtLabel(byval left as long, byval top as long, byval text as const zstring ptr) as newtComponent
 declare sub newtLabelSetText(byval co as newtComponent, byval text as const zstring ptr)</b></pre>Creating a label is just like creating a button; just pass the location of the label and the text it should display. 
@@ -172,7 +175,9 @@ declare function newtEntryGetValue(byval co as newtComponent) as zstring ptr</b>
 
     /' We cannot destroy the form until after we've used the value
        from the entry widget. '/
-    newtFormDestroy(form)  </pre><h2><a name="4-7">4.7 Checkboxes</a></h2>
+    newtFormDestroy(form)  </pre>
+	<p><b>Screenshot</b></p>
+	<p><img alt="4" title="4" src="4.png"/></p><h2><a name="4-7">4.7 Checkboxes</a></h2>
 	<p>Most widget sets include checkboxes which toggle between two value (checked or not checked).&nbsp;</p>
 	<p><tt>Newt</tt>&nbsp;checkboxes are more flexible. When the user presses the space bar on a checkbox, the checkbox's value changes to the next value in an arbitrary sequence (which wraps). </p>
 	<p>Most checkboxes have two items in that sequence, checked or not, but&nbsp;<tt>newt</tt>&nbsp;allows an arbitrary number of value. This is useful when the user must pick from a limited number of choices. Each item in the sequence is a single character, and the sequence itself is represented as a string. </p>
@@ -257,7 +262,9 @@ declare sub newtRadioSetCurrent(byval setMember as newtComponent)</b></pre>
 </pre>
 
 
-	<h2><a name="4-9">4.9 Scales</a></h2><p>&nbsp;It's common for programs to need to display a progress meter on the terminal while it performs some length operation (it behaves like an anesthetic). The scale component is a simple way of doing this. It displays a horizontal bar graph which the application can update as the operation continues.</p><div> <pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtScale(byval left as long, byval top as long, byval width as long, byval fullValue as longint) as newtComponent
+	
+	<p><b>Screenshot</b></p>
+	<p><img alt="5" title="5" src="5.png"/></p><h2><a name="4-9">4.9 Scales</a></h2><p>&nbsp;It's common for programs to need to display a progress meter on the terminal while it performs some length operation (it behaves like an anesthetic). The scale component is a simple way of doing this. It displays a horizontal bar graph which the application can update as the operation continues.</p><div> <pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtScale(byval left as long, byval top as long, byval width as long, byval fullValue as longint) as newtComponent
 declare sub newtScaleSet(byval co as newtComponent, byval amount as ulongint)</b></pre>When the scale is created with&nbsp;<tt>newtScale</tt>, it is given the width of the scale itself as well as the value which means that the scale should be drawn as full. </div><div>When the position of the scale is set with&nbsp;<tt>newtScaleSet()</tt>, the scale is told the amount of the scale which should be filled in relative to the&nbsp;<tt>fullAmount</tt>. </div>
 	<div>For example, if the application is copying a file,&nbsp;<tt>fullValue</tt>&nbsp;could be the number of bytes in the file, and when the scale is updated&nbsp;<tt>newtScaleSet()</tt>&nbsp;would be passed the number of bytes which have been copied so far.&nbsp;</div>
 	<h2><a name="4-10">4.10 Textboxes</a></h2><p>Textboxes display a block of text on the terminal, and is appropriate for display large amounts of text.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtTextbox(byval left as long, byval top as long, byval width as long, byval height as long, byval flags as long) as newtComponent
@@ -321,7 +328,9 @@ declare function newtTextboxGetNumLines(byval co as newtComponent) as long</b><!
     newtFinished()
 </pre>	
 
-		<h2><a name="4-11">4.11 Scrollbars</a></h2><p>Scrollbars (which, currently, are always vertical in&nbsp;<tt>newt</tt>), may be attached to forms to let them contain more data then they have space for. </p>
+		
+	<p><b>Screenshot</b></p>
+	<p><img alt="6" title="6" src="6.png"/></p><h2><a name="4-11">4.11 Scrollbars</a></h2><p>Scrollbars (which, currently, are always vertical in&nbsp;<tt>newt</tt>), may be attached to forms to let them contain more data then they have space for. </p>
 	<p>While the actual process of making scrolling forms is discussed at the end of this section, we'll go ahead and introduce scrollbars now so you'll be ready.</p><pre style="background-color:#d6d6d6;font-family:'Courier New', monospace"><b>declare function newtVerticalScrollbar(byval left as long, byval top as long, byval height as long, byval normalColorset as long,_
         byval thumbColorset as long) as newtComponent</b></pre>When a scrollbar is created, it is given a position on the screen, a height, and two colors. 
 	<p>The first color is the color used for drawing the scrollbar, and the second color is used for drawing the thumb. </p>
